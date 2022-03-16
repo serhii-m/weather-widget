@@ -52,10 +52,14 @@ function App () {
       data.map((loc, idx) => {
           return (
             <div key={idx}>
-              <h3>{loc.name}</h3>
-              <h5>{loc.sys.country}</h5>
-              <h5>Current temperature {loc.main.temp} ºC</h5>
-              <h5>Feels like {loc.main['feels_like']} ºC</h5>
+              <h3>{loc['name']}</h3>
+              <h5>{loc['sys']['country']}</h5>
+              <h2>Description: {loc['weather'][0]['description']}</h2>
+              <h5>Current temperature: {loc['main']['temp']} ºC</h5>
+              <h5>Feels like: {loc['main']['feels_like']} ºC</h5>
+              <h5>The wind speed: {loc['wind']['speed']} (m/sec)</h5>
+              <h5>Cloudiness: {loc['clouds']['all']}%</h5>
+              <h5>Humidity: {loc['main']['humidity']}%</h5>
             </div>
           );
         }
