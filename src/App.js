@@ -1,82 +1,113 @@
-import './App.css';
 import { useEffect, useMemo, useState } from 'react';
+import axios from 'axios';
 
-import { setInitDataToLocalStorage } from './helpers/setInitDataToLocalStorage';
-import { useGeoLocation, useLocalStorage } from './hooks';
+import { useLocalStorage } from './hooks';
 import { getWeatherData } from './services/weather/getWeatherData';
+import { DataWrapper, LoadingSpinner, LocationsList, Pagination, SearchLocationForm } from './components/index';
 
 
 function App () {
-  const location = useGeoLocation();
-  const [data, setData] = useState([]);
   const [storedValue, setValue] = useLocalStorage('locations', []);
+  const [weatherData, setWeatherData] = useState([]);
+  const [location, setLocation] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
+  const savePosition = (position) => {
+    let crd = position.coords;
 
-  useMemo(() => {
-    setInitDataToLocalStorage(location, storedValue, setValue);
-  }, [location]);
+    if (!storedValue.some(el => el.name === 'userLocation')) {
+      setValue([...storedValue, {
+        id: crd.latitude.toFixed(2) + crd.longitude.toFixed(2),
+        name: 'userLocation',
+        lat: crd.latitude,
+        lon: crd.longitude
+      }]);
+    }
+  };
+
+  const fetchLocalWeather = async () => {
+    try {
+      if (storedValue.length === 0) {
+        await window.navigator.geolocation.getCurrentPosition(savePosition);
+      }
+
+      if (!storedValue[0]) {
+        const res = await getWeatherData(storedValue[0].lat, storedValue[0].lon);
+        setWeatherData([...weatherData, res.data]);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchLocalWeather();
+  }, []);
+
+  const prepareData = [];
 
   useEffect(() => {
     const fetchData = async () => {
-      if (location.loaded) {
-        const weatherData = await getWeatherData(storedValue[0].lat, storedValue[0].lon);
-        console.log('Weather: ', weatherData);
-        /*   if (!storedValue.includes(location.coordinates.lat)) {
-             setValue([...storedValue, {
-               id: location.coordinates.lat.toFixed(3) + location.coordinates.lon.toFixed(3),
-               lat: location.coordinates.lat,
-               lon: location.coordinates.lon
-             }]);
-           }*/
-        setData([...data, weatherData]);
+      for (let i = 0; i < storedValue.length; i++) {
+        const response = await getWeatherData(storedValue[i].lat, storedValue[i].lon);
+
+        if (!prepareData.some(el => el.id === response.data.id)) {
+          prepareData.push(response.data);
+        }
       }
+      setWeatherData([...weatherData, ...prepareData]);
     };
 
     fetchData();
-    //console.log(data);
-  }, [location]);
+  }, []);
 
-  console.log(data);
+  const searchLocation = async (event) => {
+    event.preventDefault();
+    const response = await getWeatherData(location);
+
+    if (!storedValue.some(el => el.id === response.data.id)) {
+      setValue([...storedValue, {
+        id: response.data.id,
+        name: response.data.name,
+        lat: response.data.coord.lat,
+        lon: response.data.coord.lon
+      }]);
+    }
+
+    if (!weatherData.some(el => el.id === response.data.id)) {
+      setWeatherData([...weatherData, response.data]);
+    }
+
+    setLocation('');
+  };
+
+  const handleItemDelete = (id) => {
+    setWeatherData(weatherData.filter(el => el.id !== id));
+    setValue(storedValue.filter(el => el.id !== id));
+  };
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = weatherData.slice(indexOfFirstItem, indexOfLastItem);
+
+  const paginate = pageNumber => setCurrentPage(pageNumber);
+
+
   return (
     <div className="app">
-      {/* {location.loaded
-        ?
-        <>
-          <h2>{`Your latitude: ${location.coordinates.lat}`}</h2>
-          <h2>{`Your longtitude: ${location.coordinates.lon}`}</h2>
-        </>
-        :
-        <h1>Your position is calculating!</h1>
-      }*/}
-      {data.length > 0 &&
-      data.map((loc, idx) => {
-          return (
-            <div key={idx}>
-              <h3>{loc['name']}</h3>
-              <h5>{loc['sys']['country']}</h5>
-              <h2>Description: {loc['weather'][0]['description']}</h2>
-              <h5>Current temperature: {loc['main']['temp']} ºC</h5>
-              <h5>Feels like: {loc['main']['feels_like']} ºC</h5>
-              <h5>The wind speed: {loc['wind']['speed']} (m/sec)</h5>
-              <h5>Cloudiness: {loc['clouds']['all']}%</h5>
-              <h5>Humidity: {loc['main']['humidity']}%</h5>
-            </div>
-          );
-        }
-      )}
-      {/* { latitude && longitude
-          ?
-        <div className="app__container">
-          <h1>{cityName}</h1>
-          <h2>{temperature}ºC</h2>
-          <h2>{weather}</h2>
-        </div>
-          :
-          <h1>Weather data is fetching!</h1>
-        }*/}
+      <SearchLocationForm location={location} onSubmit={searchLocation} setLocation={setLocation}/>
+      {weatherData.length === 0 && <LoadingSpinner/>}
+      <LocationsList dataSet={currentItems} onDelete={handleItemDelete} zeroItem={weatherData[0]}/>
+      {weatherData.length > 5 &&
+      <Pagination
+        itemsPerPage={itemsPerPage}
+        totalItems={weatherData.length}
+        currentPage={currentPage}
+        paginate={paginate}
+      />}
     </div>
   );
 }
-
 
 export default App;
