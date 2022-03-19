@@ -3,7 +3,7 @@ import axios from 'axios';
 
 import { useLocalStorage } from './hooks';
 import { getWeatherData } from './services/weather/getWeatherData';
-import { DataWrapper, LoadingSpinner, LocationsList, Pagination, SearchLocationForm } from './components/index';
+import { DataWrapper, LoadingSpinner, LocationsList, Pages, SearchLocationForm } from './components/index';
 
 
 function App () {
@@ -11,6 +11,7 @@ function App () {
   const [weatherData, setWeatherData] = useState([]);
   const [location, setLocation] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [isValid, setValid] = useState(true);
   const itemsPerPage = 5;
 
   const savePosition = (position) => {
@@ -78,8 +79,10 @@ function App () {
     if (!weatherData.some(el => el.id === response.data.id)) {
       setWeatherData([...weatherData, response.data]);
     }
-
+    console.log(response.status);
     setLocation('');
+    response.statusText !== 'OK' ? setValid(!isValid) : null;
+    console.log(isValid);
   };
 
   const handleItemDelete = (id) => {
@@ -96,11 +99,11 @@ function App () {
 
   return (
     <div className="app">
-      <SearchLocationForm location={location} onSubmit={searchLocation} setLocation={setLocation}/>
+      <SearchLocationForm valid={isValid} location={location} onSubmit={searchLocation} setLocation={setLocation}/>
       {weatherData.length === 0 && <LoadingSpinner/>}
       <LocationsList dataSet={currentItems} onDelete={handleItemDelete} zeroItem={weatherData[0]}/>
       {weatherData.length > 5 &&
-      <Pagination
+      <Pages
         itemsPerPage={itemsPerPage}
         totalItems={weatherData.length}
         currentPage={currentPage}

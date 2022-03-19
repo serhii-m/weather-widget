@@ -1,6 +1,6 @@
 import React from 'react';
 
-const SearchLocationForm = ({ location, onSubmit, setLocation }) => {
+const SearchLocationForm = ({ location, onSubmit, setLocation, valid }) => {
   return (
     <div className="search">
       <form onSubmit={onSubmit}>
@@ -9,6 +9,7 @@ const SearchLocationForm = ({ location, onSubmit, setLocation }) => {
           onChange={event => setLocation(event.target.value)}
           placeholder="Enter location..."
           type="text"
+          required
         />
         <button type="submit" className="searchButton">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" className="bi bi-search"
@@ -18,6 +19,7 @@ const SearchLocationForm = ({ location, onSubmit, setLocation }) => {
           </svg>
         </button>
       </form>
+      {valid === false && <span>Ooops...</span>}
     </div>
   );
 };
