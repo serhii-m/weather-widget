@@ -9,7 +9,7 @@ const DataWrapper = ({ data, onDelete, itemClass, btnIsVisible }) => {
   const handleDelete = () => {
     onDelete(data.id);
   };
-  
+
   return (
     <div className="container">
       <div className="top">

@@ -9,6 +9,7 @@ export const getWeatherData = async (...args) => {
   try {
     return await axios.get(fullUrl);
   } catch (e) {
-    throw new Error('An error occurred while loading data!');
+    console.log('Shit was happened!', e);
+    return e;
   }
 };

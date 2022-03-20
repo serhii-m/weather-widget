@@ -1,6 +1,7 @@
 import React from 'react';
 
 const SearchLocationForm = ({ location, onSubmit, setLocation, valid }) => {
+
   return (
     <div className="search">
       <form onSubmit={onSubmit}>

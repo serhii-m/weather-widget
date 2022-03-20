@@ -36,6 +36,7 @@ function App () {
       if (!storedValue[0]) {
         const res = await getWeatherData(storedValue[0].lat, storedValue[0].lon);
         setWeatherData([...weatherData, res.data]);
+        console.log('I has been calling!');
       }
     } catch (err) {
       console.error(err);
@@ -61,7 +62,7 @@ function App () {
     };
 
     fetchData();
-  }, []);
+  }, [storedValue]);
 
   const searchLocation = async (event) => {
     event.preventDefault();
@@ -79,11 +80,18 @@ function App () {
     if (!weatherData.some(el => el.id === response.data.id)) {
       setWeatherData([...weatherData, response.data]);
     }
-    console.log(response.status);
+
+    console.log('Response:', response);
     setLocation('');
-    response.statusText !== 'OK' ? setValid(!isValid) : null;
+
+    /*response.statusText !== 'OK' ? setValid(!isValid) : null;
     console.log(isValid);
+
+    console.log('Huita!', e);
+    setValid(false);
+    console.log(isValid);*/
   };
+
 
   const handleItemDelete = (id) => {
     setWeatherData(weatherData.filter(el => el.id !== id));
@@ -99,9 +107,18 @@ function App () {
 
   return (
     <div className="app">
-      <SearchLocationForm valid={isValid} location={location} onSubmit={searchLocation} setLocation={setLocation}/>
+      <SearchLocationForm
+        valid={isValid}
+        location={location}
+        onSubmit={searchLocation}
+        setLocation={setLocation}
+      />
       {weatherData.length === 0 && <LoadingSpinner/>}
-      <LocationsList dataSet={currentItems} onDelete={handleItemDelete} zeroItem={weatherData[0]}/>
+      <LocationsList
+        dataSet={currentItems}
+        onDelete={handleItemDelete}
+        zeroItem={weatherData[0]}
+      />
       {weatherData.length > 5 &&
       <Pages
         itemsPerPage={itemsPerPage}
