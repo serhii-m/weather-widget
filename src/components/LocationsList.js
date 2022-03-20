@@ -13,6 +13,7 @@ const LocationsList = ({ dataSet, onDelete, zeroItem }) => {
                    onDelete={onDelete}
                    itemClass={data.id === zeroItem.id ? itemClass : ''}
                    btnIsVisible={data.id === zeroItem.id ? btnIsVisible : ''}
+                   isUserLocation={data.id === zeroItem.id}
       />
     ));
   }, [dataSet]);

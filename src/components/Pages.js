@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pagination } from 'react-bootstrap';
 
+
 const Pages = ({ itemsPerPage, totalItems, paginate, currentPage }) => {
   const pages = [];
 

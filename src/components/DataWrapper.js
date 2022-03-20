@@ -5,7 +5,7 @@ const getWeatherIcon = (icon) => {
 };
 
 
-const DataWrapper = ({ data, onDelete, itemClass, btnIsVisible }) => {
+const DataWrapper = ({ data, onDelete, itemClass, btnIsVisible, isUserLocation }) => {
   const handleDelete = () => {
     onDelete(data.id);
   };
@@ -16,6 +16,7 @@ const DataWrapper = ({ data, onDelete, itemClass, btnIsVisible }) => {
         <div className="location">
           {data.name && <p className={`location-name ${itemClass}`}>{data.name},</p>}
           {data.sys && <p className={`location-name ${itemClass} ps-3`}>{data.sys.country}</p>}
+          {data.name && isUserLocation && <span className={`${itemClass} ps-3`}>Your location</span>}
           <button type="button" className={`trashButton ${btnIsVisible}`} onClick={handleDelete}>
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" className="bi bi-trash"
                  viewBox="0 0 16 16">

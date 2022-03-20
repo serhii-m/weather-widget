@@ -12,34 +12,33 @@ function App () {
   const [location, setLocation] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [isValid, setValid] = useState(true);
+
   const itemsPerPage = 5;
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = weatherData.slice(indexOfFirstItem, indexOfLastItem);
+  const paginate = pageNumber => setCurrentPage(pageNumber);
 
   const savePosition = (position) => {
     let crd = position.coords;
 
-    if (!storedValue.some(el => el.name === 'userLocation')) {
-      setValue([...storedValue, {
-        id: crd.latitude.toFixed(2) + crd.longitude.toFixed(2),
-        name: 'userLocation',
-        lat: crd.latitude,
-        lon: crd.longitude
-      }]);
-    }
+    setValue([...storedValue, {
+      id: crd.latitude.toFixed(1) + crd.longitude.toFixed(1),
+      name: 'userLocation',
+      lat: crd.latitude,
+      lon: crd.longitude
+    }]);
   };
 
   const fetchLocalWeather = async () => {
     try {
       if (storedValue.length === 0) {
         await window.navigator.geolocation.getCurrentPosition(savePosition);
-      }
-
-      if (!storedValue[0]) {
         const res = await getWeatherData(storedValue[0].lat, storedValue[0].lon);
         setWeatherData([...weatherData, res.data]);
-        console.log('I has been calling!');
       }
     } catch (err) {
-      console.error(err);
+      console.error(err.message);
     }
   };
 
@@ -47,18 +46,15 @@ function App () {
     fetchLocalWeather();
   }, []);
 
-  const prepareData = [];
-
   useEffect(() => {
     const fetchData = async () => {
+      const prepareData = [];
+
       for (let i = 0; i < storedValue.length; i++) {
         const response = await getWeatherData(storedValue[i].lat, storedValue[i].lon);
-
-        if (!prepareData.some(el => el.id === response.data.id)) {
-          prepareData.push(response.data);
-        }
+        prepareData.push(response.data);
       }
-      setWeatherData([...weatherData, ...prepareData]);
+      setWeatherData([...prepareData]);
     };
 
     fetchData();
@@ -70,46 +66,32 @@ function App () {
 
     if (response instanceof Error) {
       setValid(!isValid);
-
-      return;
+      return null;
     }
 
-    if (!storedValue.some(el => el.id === response.data.id)) {
+    if (!storedValue.some(item => (
+      (response.data.coord.lat.toFixed(1) + response.data.coord.lon.toFixed(1))
+      === storedValue[0].id) || item.id === response.data.id)) {
       setValue([...storedValue, {
         id: response.data.id,
         name: response.data.name,
         lat: response.data.coord.lat,
         lon: response.data.coord.lon
       }]);
-    }
 
-    if (!weatherData.some(el => el.id === response.data.id)) {
       setWeatherData([...weatherData, response.data]);
     }
 
-    console.log('Response:', response);
     setLocation('');
     isValid ? null : setValid(!isValid);
-
-    if (!response.data) {
-      setValid(!isValid);
-      console.log(isValid);
-    }
   };
-
 
   const handleItemDelete = (id) => {
     setWeatherData(weatherData.filter(el => el.id !== id));
     setValue(storedValue.filter(el => el.id !== id));
   };
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = weatherData.slice(indexOfFirstItem, indexOfLastItem);
 
-  const paginate = pageNumber => setCurrentPage(pageNumber);
-
-  console.log(isValid);
   return (
     <div className="app">
       <SearchLocationForm

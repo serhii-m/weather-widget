@@ -8,7 +8,7 @@ export const getWeatherData = async (...args) => {
 
   return await axios.get(fullUrl).catch(function (error) {
     if (error.response) {
-      console.log(error.response.status);
+      console.log(error.response);
     } else if (error.request) {
       console.log(error.request);
     } else {
