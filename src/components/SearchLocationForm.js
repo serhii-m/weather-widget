@@ -20,7 +20,7 @@ const SearchLocationForm = ({ location, onSubmit, setLocation, valid }) => {
           </svg>
         </button>
       </form>
-      {valid === false && <span>Ooops...</span>}
+      {valid === false && <span className="error">Oops... something went wrong. Please try again. </span>}
     </div>
   );
 };

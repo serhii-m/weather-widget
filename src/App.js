@@ -68,6 +68,12 @@ function App () {
     event.preventDefault();
     const response = await getWeatherData(location);
 
+    if (response instanceof Error) {
+      setValid(!isValid);
+
+      return;
+    }
+
     if (!storedValue.some(el => el.id === response.data.id)) {
       setValue([...storedValue, {
         id: response.data.id,
@@ -83,13 +89,12 @@ function App () {
 
     console.log('Response:', response);
     setLocation('');
+    isValid ? null : setValid(!isValid);
 
-    /*response.statusText !== 'OK' ? setValid(!isValid) : null;
-    console.log(isValid);
-
-    console.log('Huita!', e);
-    setValid(false);
-    console.log(isValid);*/
+    if (!response.data) {
+      setValid(!isValid);
+      console.log(isValid);
+    }
   };
 
 
@@ -104,7 +109,7 @@ function App () {
 
   const paginate = pageNumber => setCurrentPage(pageNumber);
 
-
+  console.log(isValid);
   return (
     <div className="app">
       <SearchLocationForm
