@@ -20,6 +20,12 @@ or
 #### and install packages write command: 
 `npm install`
 
+### Fetch weather data
+
+You need to register on the [OpenWeather](https://openweathermap.org/) and use your API key to receive data.
+
+In the root of the project create a .env file following the .env-example and specify your key in REACT_APP_API_KEY variable.
+
 ## Running the app in development mode
 
 In the project directory run command:
